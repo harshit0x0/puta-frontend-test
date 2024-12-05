@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/items'
 import { Card, CardContent, CardFooter } from '@/components/ui/items'
 
 const news = [
