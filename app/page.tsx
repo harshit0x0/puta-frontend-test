@@ -1,9 +1,9 @@
-import ImageCarousel from '@/components/home/image-carousel'
-import AboutSection from '@/components/home/about-section'
-import PresidentMessage from '@/components/home/president-message'
-import NewsSection from '@/components/home/news-section'
-import ActivitiesSection from '@/components/home/activities-section'
-import NewsScroll from '@/components/home/news-scroll-strip'
+import ImageCarousel from "@/components/home/image-carousel";
+import AboutSection from "@/components/home/about-section";
+import PresidentMessage from "@/components/home/president-message";
+import NewsSection from "@/components/home/news-section";
+import ActivitiesSection from "@/components/home/activities-section";
+import NewsScroll from "@/components/home/news-scroll-strip";
 
 export default function Home() {
   return (
@@ -15,13 +15,15 @@ export default function Home() {
         <PresidentMessage />
         <div className="flex flex-col lg:flex-row gap-8 mx-4 lg:mx-0  mt-8">
           <NewsSection />
-          <div className="lg:w-2/3 w-full min-h-[40vh] bg-gray-400 text-center"> Something here </div>
+          <div className="lg:w-2/3 w-full min-h-[40vh] bg-gray-400 text-center">
+            {" "}
+            Something here{" "}
+          </div>
         </div>
         <div className="mx-4">
           <ActivitiesSection />
         </div>
       </div>
-    </div >
-  )
+    </div>
+  );
 }
-
