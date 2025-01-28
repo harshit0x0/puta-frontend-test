@@ -5,6 +5,15 @@ import { TopNavbar } from "@/components/admin/TopNavbar";
 
 // Main Layout Component
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
+  // check if cookies available
+  if (typeof window !== "undefined") {
+    const cookies = document.cookie.split("; ");
+    const cookie = cookies.find((cookie) => cookie.startsWith("token="));
+    if (!cookie) {
+      window.location.href = "/login";
+    }
+  }
+
   const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {

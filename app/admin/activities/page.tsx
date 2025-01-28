@@ -1,26 +1,20 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
-import { Button, Input, Modal, Textarea } from "@/components/admin/ui";
+import { Button, Input, Modal } from "@/components/admin/ui";
+import { ActivityForm } from "@/components/admin/AcitivityForm";
+import { Activity } from "@/app/types";
 
-// Types
-interface Activity {
-  id: string;
-  title: string;
-  date: string;
-  description: string;
-  image: string;
-  status: "published" | "draft";
-}
-
-interface ActivityFormData {
-  title: string;
-  date: string;
-  description: string;
-  image: string;
-  status: "published" | "draft";
-}
+// // Types
+// interface Activity {
+//   id: string;
+//   name: string;
+//   date: string;
+//   description: string;
+//   image: string;
+//   status: "published" | "draft";
+// }
 
 // Activity List Component
 const ActivitiesList: React.FC = () => {
@@ -33,92 +27,46 @@ const ActivitiesList: React.FC = () => {
   );
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Activity Form Component
-  const ActivityForm: React.FC<{
-    initialData?: ActivityFormData;
-    onSubmit: (data: ActivityFormData) => void;
-    onCancel: () => void;
-  }> = ({ initialData, onSubmit, onCancel }) => {
-    const [formData, setFormData] = useState<ActivityFormData>(
-      initialData || {
-        title: "",
-        date: "",
-        description: "",
-        image: "",
-        status: "draft",
+  // Create Activity
+  async function createActivity(data: any) {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/activities`,
+        {
+          method: "POST",
+          body: JSON.stringify(data),
+        }
+      );
+
+      if (!res) {
+        throw new Error("Failed to create activity");
       }
-    );
+      const activity = await res.json();
+      console.log("Created activity:", activity);
+      setActivities([...activities, activity]);
+    } catch (error) {
+      alert("Failed to create activity");
+      console.error("Error creating activity:", error);
+    }
+  }
 
-    return (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          onSubmit(formData);
-        }}
-        className="space-y-4"
-      >
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Title
-          </label>
-          <Input
-            value={formData.title}
-            onChange={(e) =>
-              setFormData({ ...formData, title: e.target.value })
-            }
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Date
-          </label>
-          <Input
-            type="date"
-            value={formData.date}
-            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Description
-          </label>
-          <Textarea
-            value={formData.description}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Image URL
-          </label>
-          <Input
-            value={formData.image}
-            onChange={(e) =>
-              setFormData({ ...formData, image: e.target.value })
-            }
-            required
-          />
-        </div>
-
-        <div className="flex justify-end space-x-3 mt-6">
-          <Button variant="secondary" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button type="submit" variant="primary">
-            {initialData ? "Update Activity" : "Create Activity"}
-          </Button>
-        </div>
-      </form>
-    );
-  };
+  useEffect(() => {
+    // Fetch activities from the server
+    async function fetchActivities() {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/activities`
+        );
+        const data = await response.json();
+        console.log("Fetched activities:", data.files);
+        setActivities(data.files);
+      } catch (error) {
+        console.error("Error fetching activities:", error);
+        return [];
+      }
+    }
+    fetchActivities();
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -148,55 +96,56 @@ const ActivitiesList: React.FC = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
-                  Title
+                  name
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 hidden md:table-cell">
                   Date
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 hidden md:table-cell">
+                {/* <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 hidden md:table-cell">
                   Status
-                </th>
+                </th> */}
                 <th className="px-6 py-3 text-right text-sm font-medium text-gray-500">
                   Actions
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {activities
-                .filter(
-                  (activity) =>
-                    activity.title
-                      .toLowerCase()
-                      .includes(searchQuery.toLowerCase()) ||
-                    activity.description
-                      .toLowerCase()
-                      .includes(searchQuery.toLowerCase())
-                )
-                .map((activity) => (
-                  <tr key={activity.id}>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0 mr-4 hidden sm:block">
-                          <Image
-                            src={activity.image}
-                            alt={activity.title}
-                            width={40}
-                            height={40}
-                            className="rounded-md object-cover"
-                          />
+              {activities.length > 0 &&
+                activities
+                  .filter(
+                    (activity) =>
+                      activity?.name
+                        ?.toLowerCase()
+                        .includes(searchQuery.toLowerCase()) ||
+                      activity?.description
+                        ?.toLowerCase()
+                        .includes(searchQuery.toLowerCase())
+                  )
+                  .map((activity, index) => (
+                    <tr key={index}>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center">
+                          <div className="h-10 w-10 flex-shrink-0 mr-4 hidden sm:block">
+                            <Image
+                              src={activity?.url ?? "/placeholder.png"}
+                              alt={activity?.name}
+                              width={40}
+                              height={40}
+                              className="rounded-md object-cover"
+                            />
+                          </div>
+                          <div className="font-medium text-gray-900">
+                            {activity?.name}
+                          </div>
                         </div>
-                        <div className="font-medium text-gray-900">
-                          {activity.title}
+                      </td>
+                      <td className="px-6 py-4 hidden md:table-cell">
+                        <div className="text-sm text-gray-900">
+                          {new Date(activity?.createdAt ?? "").toDateString()}
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 hidden md:table-cell">
-                      <div className="text-sm text-gray-900">
-                        {activity.date}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 hidden md:table-cell">
-                      <span
+                      </td>
+                      {/*<td className="px-6 py-4 hidden md:table-cell">
+                      <span 
                         className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                           activity.status === "published"
                             ? "bg-green-100 text-green-800"
@@ -205,33 +154,33 @@ const ActivitiesList: React.FC = () => {
                       >
                         {activity.status}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end space-x-2">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedActivity(activity);
-                            setIsEditModalOpen(true);
-                          }}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedActivity(activity);
-                            setIsDeleteModalOpen(true);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                    </td> */}
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end space-x-2">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedActivity(activity);
+                              setIsEditModalOpen(true);
+                            }}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedActivity(activity);
+                              setIsDeleteModalOpen(true);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
             </tbody>
           </table>
         </div>
@@ -246,6 +195,7 @@ const ActivitiesList: React.FC = () => {
         <ActivityForm
           onSubmit={(data) => {
             // Handle create logic here
+            createActivity(data);
             setIsAddModalOpen(false);
           }}
           onCancel={() => setIsAddModalOpen(false)}
@@ -260,9 +210,10 @@ const ActivitiesList: React.FC = () => {
       >
         {selectedActivity && (
           <ActivityForm
-            initialData={selectedActivity}
+            //initialData={selectedActivity}
             onSubmit={(data) => {
               // Handle update logic here
+              // updateActivity(selectedActivity._id, data);
               setIsEditModalOpen(false);
             }}
             onCancel={() => setIsEditModalOpen(false)}

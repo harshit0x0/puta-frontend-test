@@ -1,31 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MemberForm } from "@/components/admin/MemberForm";
-
-interface Member {
-  id: number;
-  name: string;
-  designation: string;
-  position: string;
-  college: string;
-  contact: string;
-  membershipValidity: string;
-  status: "active" | "expired";
-}
+import { Member } from "@/app/types";
 
 const MemberManagement = () => {
-  const [members, setMembers] = useState<Member[]>([
-    {
-      id: 1,
-      name: "Dr. Rajesh Kumar",
-      designation: "Professor",
-      position: "President",
-      college: "Engineering College",
-      contact: "9876543210",
-      membershipValidity: "2024-12-31",
-      status: "active",
-    },
-  ]);
+  const [members, setMembers] = useState<Member[]>([]);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -35,9 +14,109 @@ const MemberManagement = () => {
 
   const handleDelete = async (memberId: number) => {
     if (window.confirm("Are you sure you want to delete this member?")) {
-      setMembers(members.filter((member) => member.id !== memberId));
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/members/${memberId}`,
+          {
+            method: "DELETE",
+          }
+        );
+        if (!response.ok) {
+          throw new Error("Failed to delete member");
+        }
+        alert("Member deleted successfully");
+      } catch (error) {
+        console.log(error);
+        alert("Failed to delete member");
+      }
+      setMembers(members.filter((member) => member._id !== memberId));
     }
   };
+
+  const handleSubmit = async (data: Member) => {
+    if (showAddModal) {
+      console.log(data);
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/members`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          }
+        );
+        if (!response.ok) {
+          throw new Error("Failed to add member");
+        }
+        const newMember = await response.json();
+        setMembers([members, newMember]);
+        alert("Member added successfully");
+      } catch (error) {
+        alert("Failed to add member");
+        console.log(error);
+      }
+    } else {
+      setMembers(
+        members.map((m) =>
+          m._id === selectedMember?._id ? { ...m, ...data } : m
+        )
+      );
+    }
+
+    setShowAddModal(false);
+    setShowEditModal(false);
+    setSelectedMember(null);
+  };
+
+  const assignPosition = (members: Member[]) => {
+    return members.map((member) => {
+      switch (member.name) {
+        case process.env.NEXT_PUBLIC_PRESIDENT:
+          member.position = "President";
+          break;
+        case process.env.NEXT_PUBLIC_VICE_PRESIDENT:
+          member.position = "Vice President";
+          break;
+        case process.env.NEXT_PUBLIC_TREASURER:
+          member.position = "Treasurer";
+          break;
+        case process.env.NEXT_PUBLIC_GENERAL_SECRETARY:
+          member.position = "General Secretary";
+          break;
+        default:
+          member.position = "Member";
+          break;
+      }
+      return member;
+    });
+  };
+
+  // Fetch members from the server
+  useEffect(() => {
+    async function fetchMembers() {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/members`
+        );
+        const data = await response.json();
+        if (!data.files) return;
+        const members = assignPosition(data.files);
+        setMembers(members);
+      } catch (error) {
+        console.error("Error fetching members:", error);
+      }
+    }
+
+    fetchMembers();
+  }, []);
+
+  const filteredMembers = members
+    ? members.filter((member) => {
+        return member.name.toLowerCase().includes(searchTerm.toLowerCase());
+      })
+    : [];
 
   return (
     <div className="space-y-6 p-4 md:p-6 lg:p-8">
@@ -80,7 +159,7 @@ const MemberManagement = () => {
                 "Position",
                 "College",
                 "Contact",
-                "Status",
+                // "Status",
                 "Actions",
               ].map((header) => (
                 <th key={header} className="px-4 py-3 text-left text-gray-600">
@@ -90,14 +169,14 @@ const MemberManagement = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {members.map((member) => (
-              <tr key={member.id}>
+            {filteredMembers.map((member, index) => (
+              <tr key={index}>
                 <td className="px-4 py-3">{member.name}</td>
                 <td className="px-4 py-3">{member.designation}</td>
                 <td className="px-4 py-3">{member.position}</td>
                 <td className="px-4 py-3">{member.college}</td>
-                <td className="px-4 py-3">{member.contact}</td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3">{member.mobileNo}</td>
+                {/* <td className="px-4 py-3">
                   <span
                     className={`px-2 py-1 rounded-full text-xs ${
                       member.status === "active"
@@ -107,7 +186,7 @@ const MemberManagement = () => {
                   >
                     {member.status}
                   </span>
-                </td>
+                </td> */}
                 <td className="px-4 py-3">
                   <div className="flex space-x-2">
                     <button
@@ -120,7 +199,7 @@ const MemberManagement = () => {
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(member.id)}
+                      onClick={() => handleDelete(member._id)}
                       className="text-red-600 hover:text-red-800"
                     >
                       Delete
@@ -141,20 +220,7 @@ const MemberManagement = () => {
             </h3>
             <MemberForm
               initialData={selectedMember}
-              onSubmit={(data) => {
-                if (showAddModal) {
-                  setMembers([...members, { ...data, id: Date.now() }]);
-                } else {
-                  setMembers(
-                    members.map((m) =>
-                      m.id === selectedMember?.id ? { ...m, ...data } : m
-                    )
-                  );
-                }
-                setShowAddModal(false);
-                setShowEditModal(false);
-                setSelectedMember(null);
-              }}
+              onSubmit={handleSubmit}
               onCancel={() => {
                 setShowAddModal(false);
                 setShowEditModal(false);

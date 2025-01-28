@@ -1,15 +1,5 @@
 import { useState } from "react";
-
-interface Member {
-  id: number;
-  name: string;
-  designation: string;
-  position: string;
-  college: string;
-  contact: string;
-  membershipValidity: string;
-  status: "active" | "expired";
-}
+import { Member } from "@/app/types";
 
 interface MemberFormProps {
   initialData: Member | null;
@@ -24,14 +14,16 @@ export const MemberForm: React.FC<MemberFormProps> = ({
 }) => {
   const [formData, setFormData] = useState<Member>(
     initialData || {
-      id: -1,
+      _id: -1,
       name: "",
       designation: "",
       position: "Member",
       college: "",
-      contact: "",
-      status: "active",
-      membershipValidity: "",
+      mobileNo: "",
+      // status: "active",
+      endOfMembership: "",
+      department: "",
+      role: "member",
     }
   );
 
@@ -114,19 +106,19 @@ export const MemberForm: React.FC<MemberFormProps> = ({
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Contact
+            Department
           </label>
           <input
-            type="tel"
-            name="contact"
-            value={formData.contact}
+            type="text"
+            name="department"
+            value={formData.department}
             onChange={handleChange}
             className="w-full px-3 py-2 border rounded-md"
             required
           />
         </div>
       </div>
-
+      {/* 
       <div>
         <label className="block text-sm font-medium text-gray-700">
           Status
@@ -142,20 +134,34 @@ export const MemberForm: React.FC<MemberFormProps> = ({
           <option value="active">Active</option>
           <option value="expired">Expired</option>
         </select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Membership Validity
-        </label>
-        <input
-          type="date"
-          name="membershipValidity"
-          value={formData.membershipValidity}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border rounded-md"
-          required
-        />
+      </div> */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Membership Validity
+          </label>
+          <input
+            type="date"
+            name="endOfMembership"
+            value={formData.endOfMembership}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Contact
+          </label>
+          <input
+            type="tel"
+            name="mobileNo"
+            value={formData.mobileNo}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md"
+            required
+          />
+        </div>
       </div>
 
       <div className="flex justify-end space-x-4">
