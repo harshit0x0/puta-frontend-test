@@ -5,6 +5,7 @@ import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { Button, Input, Modal } from "@/components/admin/ui";
 import { ActivityForm } from "@/components/admin/AcitivityForm";
 import { Activity } from "@/app/types";
+import Loading from "@/components/ui/loading";
 
 // // Types
 // interface Activity {
@@ -26,10 +27,12 @@ const ActivitiesList: React.FC = () => {
     null
   );
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(activities.length === 0);
 
   // Create Activity
   async function createActivity(data: any, file: File) {
     try {
+      setIsLoading(true);
       const formData = new FormData();
       Object.keys(data).forEach((key) => {
         formData.append(key, data[key]);
@@ -54,12 +57,15 @@ const ActivitiesList: React.FC = () => {
     } catch (error) {
       alert("Failed to create activity");
       console.error("Error creating activity:", error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
   // Delete Activity
   async function deleteActivity(id: number) {
     try {
+      setIsLoading(true);
       console.log("Deleting activity with id:", id);
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/activities/${id}`,
@@ -75,12 +81,15 @@ const ActivitiesList: React.FC = () => {
     } catch (error) {
       alert("Failed to delete activity");
       console.error("Error deleting activity:", error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
   // update Activity
   async function updateActivity(id: number, data: any, file: File) {
     try {
+      setIsLoading(true);
       const formData = new FormData();
       Object.keys(data).forEach((key) => {
         formData.append(key, data[key]);
@@ -107,6 +116,8 @@ const ActivitiesList: React.FC = () => {
     } catch (error) {
       alert("Failed to update activity");
       console.error("Error updating activity:", error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -126,10 +137,12 @@ const ActivitiesList: React.FC = () => {
       }
     }
     fetchActivities();
+    setIsLoading(false);
   }, []);
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {isLoading && <Loading />}
       <div className="flex flex-col md:flex-row justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-blue-900 mb-4 md:mb-0">
           Manage Activities

@@ -20,3 +20,14 @@ export interface Activity {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface News {
+  _id?: number
+  name: string;
+  description: string;
+  url: string;
+  cloudinaryId: string;
+  fileType: string;
+  createdAt?: string;
+  updatedAt?: string;
+}

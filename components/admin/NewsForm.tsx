@@ -2,44 +2,43 @@ import { useState } from "react";
 import { Button, Input, Textarea } from "@/components/admin/ui";
 
 interface NewsFormData {
-  title: string;
-  date: string;
+  name: string;
+  createdAt?: string;
   description: string;
-  image: string;
-  status: "published" | "draft";
 }
 
 // News Form Component
 export const NewsForm: React.FC<{
   initialData?: NewsFormData;
-  onSubmit: (data: NewsFormData) => void;
+  onSubmit: (data: NewsFormData, file: File) => void;
   onCancel: () => void;
 }> = ({ initialData, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState<NewsFormData>(
     initialData || {
-      title: "",
-      date: "",
+      name: "",
+      createdAt: "",
       description: "",
-      image: "",
-      status: "draft",
     }
   );
+
+  const [file, setFile] = useState<File | null>(null);
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        onSubmit(formData);
+        if (!formData.name || !formData.description || !file) return;
+        onSubmit(formData, file);
       }}
       className="space-y-4"
     >
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Title
+          name
         </label>
         <Input
-          value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           required
         />
       </div>
@@ -49,9 +48,11 @@ export const NewsForm: React.FC<{
           Date
         </label>
         <Input
-          type="date"
-          value={formData.date}
-          onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+          type="Date"
+          value={formData.createdAt || ""}
+          onChange={(e) =>
+            setFormData({ ...formData, createdAt: e.target.value })
+          }
           required
         />
       </div>
@@ -69,14 +70,28 @@ export const NewsForm: React.FC<{
         />
       </div>
 
-      <div>
+      <div className="flex justify-end space-x-3 mt-6">
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Image URL
+          Upload File
         </label>
-        <Input
-          value={formData.image}
-          onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-          required
+        {/* <Input
+          value={""}
+          type="file"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              setFormData({ ...formData, file });
+            }
+          }}
+        /> */}
+        <input
+          type="file"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              setFile(file);
+            }
+          }}
         />
       </div>
 
@@ -85,7 +100,7 @@ export const NewsForm: React.FC<{
           Cancel
         </Button>
         <Button type="submit" variant="primary">
-          {initialData ? "Update News" : "Create News"}
+          {initialData ? "UpcreatedAt News" : "Create News"}
         </Button>
       </div>
     </form>

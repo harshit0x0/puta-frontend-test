@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { MemberForm } from "@/components/admin/MemberForm";
 import { Member } from "@/app/types";
+import Loading from "@/components/ui/loading";
 
 const MemberManagement = () => {
   const [members, setMembers] = useState<Member[]>([]);
@@ -11,9 +12,11 @@ const MemberManagement = () => {
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [isLoading, setIsLoading] = useState(members.length === 0);
 
   const handleDelete = async (memberId: number) => {
     if (window.confirm("Are you sure you want to delete this member?")) {
+      setIsLoading(true);
       try {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/members/${memberId}`,
@@ -28,6 +31,8 @@ const MemberManagement = () => {
       } catch (error) {
         console.log(error);
         alert("Failed to delete member");
+      } finally {
+        setIsLoading(false);
       }
       setMembers(members.filter((member) => member._id !== memberId));
     }
@@ -37,6 +42,8 @@ const MemberManagement = () => {
     if (showAddModal) {
       console.log(data);
       try {
+        setIsLoading(true);
+        setShowAddModal(false);
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/members`,
           {
@@ -53,9 +60,12 @@ const MemberManagement = () => {
         const newMember = await response.json();
         setMembers([members, newMember]);
         alert("Member added successfully");
+        window.location.reload();
       } catch (error) {
         alert("Failed to add member");
         console.log(error);
+      } finally {
+        setIsLoading(false);
       }
     } else {
       setMembers(
@@ -106,6 +116,8 @@ const MemberManagement = () => {
         setMembers(members);
       } catch (error) {
         console.error("Error fetching members:", error);
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -114,12 +126,15 @@ const MemberManagement = () => {
 
   const filteredMembers = members
     ? members.filter((member) => {
-        return member.name.toLowerCase().includes(searchTerm.toLowerCase());
+        return (
+          member.name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? ""
+        );
       })
     : [];
 
   return (
     <div className="space-y-6 p-4 md:p-6 lg:p-8">
+      {isLoading && <Loading />}
       <div className="flex flex-wrap justify-between items-center gap-4">
         <h2 className="text-2xl font-bold text-gray-800">Member Management</h2>
         <button
@@ -189,7 +204,7 @@ const MemberManagement = () => {
                 </td> */}
                 <td className="px-4 py-3">
                   <div className="flex space-x-2">
-                    <button
+                    {/* <button
                       onClick={() => {
                         setSelectedMember(member);
                         setShowEditModal(true);
@@ -197,7 +212,7 @@ const MemberManagement = () => {
                       className="text-blue-600 hover:text-blue-800"
                     >
                       Edit
-                    </button>
+                    </button> */}
                     <button
                       onClick={() => handleDelete(member._id)}
                       className="text-red-600 hover:text-red-800"
