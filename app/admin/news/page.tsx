@@ -128,7 +128,7 @@ const NewsList: React.FC = () => {
           _id: news._id,
           name: news.name,
           description: news.description,
-          url: news.url.replace("/raw/upload/", "/upload/fl_attachment/"),
+          url: news.url,
           cloudinaryId: news.cloudinaryId,
           fileType: news.fileType,
           createdAt: news.createdAt,

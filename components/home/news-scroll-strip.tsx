@@ -96,7 +96,7 @@ export default function NewsScroll() {
         if (!data.files || data.files.length === 0) return [];
         const news = data.files.map((news: any) => ({
           title: news.description,
-          link: news.url.replace("/raw/upload/", "/upload/fl_attachment/"),
+          link: news.url,
         }));
         setNews(news);
       } catch (error) {

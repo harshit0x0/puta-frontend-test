@@ -30,7 +30,7 @@ export default function NewsSection() {
         const news = data.files.map((news: any) => ({
           id: news._id,
           title: news.description,
-          link: news.url.replace("/raw/upload/", "/upload/fl_attachment/"),
+          link: news.url,
           date: news.createdAt,
           isNew:
             news.createdAt > new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
