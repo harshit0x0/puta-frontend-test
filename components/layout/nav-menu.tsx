@@ -29,7 +29,7 @@ export default function NavMenu() {
     if (isLoggedIn()) {
       setMenuItems([...navItems, { name: "Admin Dashboard", href: "/admin" }]);
     } else {
-      setMenuItems([...navItems, { name: "Login", href: "/login" }]);
+      setMenuItems([...navItems, { name: "Admin Login", href: "/login" }]);
     }
   }, []);
 

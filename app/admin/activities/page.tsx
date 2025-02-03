@@ -28,13 +28,18 @@ const ActivitiesList: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Create Activity
-  async function createActivity(data: any) {
+  async function createActivity(data: any, file: File) {
     try {
+      const formData = new FormData();
+      Object.keys(data).forEach((key) => {
+        formData.append(key, data[key]);
+      });
+      formData.append("file", file);
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/activities`,
         {
           method: "POST",
-          body: JSON.stringify(data),
+          body: formData,
         }
       );
 
@@ -43,10 +48,65 @@ const ActivitiesList: React.FC = () => {
       }
       const activity = await res.json();
       console.log("Created activity:", activity);
+      alert("Activity created successfully");
       setActivities([...activities, activity]);
+      window.location.reload();
     } catch (error) {
       alert("Failed to create activity");
       console.error("Error creating activity:", error);
+    }
+  }
+
+  // Delete Activity
+  async function deleteActivity(id: number) {
+    try {
+      console.log("Deleting activity with id:", id);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/activities/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (!res.ok) {
+        throw new Error("Failed to delete activity");
+      }
+      alert("Activity deleted successfully");
+      setActivities(activities.filter((activity) => activity._id !== id));
+    } catch (error) {
+      alert("Failed to delete activity");
+      console.error("Error deleting activity:", error);
+    }
+  }
+
+  // update Activity
+  async function updateActivity(id: number, data: any, file: File) {
+    try {
+      const formData = new FormData();
+      Object.keys(data).forEach((key) => {
+        formData.append(key, data[key]);
+      });
+      formData.append("file", file);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/activities/${id}`,
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
+      if (!res.ok) {
+        throw new Error("Failed to update activity");
+      }
+      const activity = await res.json();
+      console.log("Updated activity:", activity);
+      alert("Activity updated successfully");
+      setActivities(
+        activities.map((activity) =>
+          activity._id === id ? { ...activity, ...activity } : activity
+        )
+      );
+    } catch (error) {
+      alert("Failed to update activity");
+      console.error("Error updating activity:", error);
     }
   }
 
@@ -131,7 +191,7 @@ const ActivitiesList: React.FC = () => {
                               alt={activity?.name}
                               width={40}
                               height={40}
-                              className="rounded-md object-cover"
+                              className="rounded-md object-cover w-10 h-10"
                             />
                           </div>
                           <div className="font-medium text-gray-900">
@@ -157,7 +217,7 @@ const ActivitiesList: React.FC = () => {
                     </td> */}
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end space-x-2">
-                          <Button
+                          {/* <Button
                             variant="secondary"
                             size="sm"
                             onClick={() => {
@@ -166,7 +226,7 @@ const ActivitiesList: React.FC = () => {
                             }}
                           >
                             <Pencil className="h-4 w-4" />
-                          </Button>
+                          </Button> */}
                           <Button
                             variant="danger"
                             size="sm"
@@ -193,9 +253,9 @@ const ActivitiesList: React.FC = () => {
         title="Add New Activity"
       >
         <ActivityForm
-          onSubmit={(data) => {
+          onSubmit={(data, file) => {
             // Handle create logic here
-            createActivity(data);
+            createActivity(data, file);
             setIsAddModalOpen(false);
           }}
           onCancel={() => setIsAddModalOpen(false)}
@@ -203,23 +263,22 @@ const ActivitiesList: React.FC = () => {
       </Modal>
 
       {/* Edit Activity Modal */}
-      <Modal
+      {/* <Modal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         title="Edit Activity"
       >
         {selectedActivity && (
           <ActivityForm
-            //initialData={selectedActivity}
-            onSubmit={(data) => {
-              // Handle update logic here
-              // updateActivity(selectedActivity._id, data);
+            initialData={selectedActivity}
+            onSubmit={(data, file) => {
+              updateActivity(selectedActivity._id ?? 0, data, file);
               setIsEditModalOpen(false);
             }}
             onCancel={() => setIsEditModalOpen(false)}
           />
         )}
-      </Modal>
+      </Modal> */}
 
       {/* Delete Confirmation Modal */}
       <Modal
@@ -244,6 +303,7 @@ const ActivitiesList: React.FC = () => {
             variant="danger"
             onClick={() => {
               // Handle delete logic here
+              deleteActivity(selectedActivity?._id ?? 0);
               setIsDeleteModalOpen(false);
             }}
           >

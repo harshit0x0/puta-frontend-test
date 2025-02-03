@@ -7,14 +7,24 @@ export default function PresidentMessage() {
         From the desk of the President
       </h2>
       <div className="flex flex-col md:flex-row gap-6 lg:p-6">
-        <Image
-          src="/pramod_mall.jpg"
-          alt="PUTA President"
-          width={200}
-          height={200}
-          className="rounded-lg mx-auto lg:my-10 my-5 max-h-60"
-        />
-        <div>
+        <div className="w-1/4 h-full">
+          <Image
+            src="/pramod_mall.jpg"
+            alt="PUTA President"
+            width={200}
+            height={200}
+            className="rounded-lg mx-auto lg:my-10 my-5 max-h-60"
+          />
+          <div>
+            <h2 className="text-lg font-bold mb-2 mx-0 text-center">
+              Dr. Pramod Mall
+            </h2>
+            <p className="text-lg font-semibold mb-2 mx-0 text-center">
+              President, PUTA
+            </p>
+          </div>
+        </div>
+        <div className="w-3/4 h-full">
           <h3 className="text-3xl font-bold mb-6 text-center">
             Dr. Pramod Mall
           </h3>
@@ -57,8 +67,6 @@ export default function PresidentMessage() {
             a leader across the agriculture and Technology educational landscape
             in India and abroad.
             <br />
-            <b> Dr Pramod Mall </b>
-            <b> President, Pant University Teachers Association (PUTA) </b>
           </p>
         </div>
       </div>

@@ -1,17 +1,18 @@
 import { useState } from "react";
 import { Button, Input, Textarea } from "@/components/admin/ui";
+
 // Activity Form Component
 
 interface ActivityFormData {
   name: string;
   description: string;
   fileType: "image";
-  file: File | null;
+  // file: File | null;
 }
 
 export const ActivityForm: React.FC<{
   initialData?: ActivityFormData;
-  onSubmit: (data: ActivityFormData) => void;
+  onSubmit: (data: ActivityFormData, file: File) => void;
   onCancel: () => void;
 }> = ({ initialData, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState<ActivityFormData>(
@@ -19,19 +20,16 @@ export const ActivityForm: React.FC<{
       name: "",
       description: "",
       fileType: "image",
-      file: null,
     }
   );
+  const [file, setFile] = useState<File | null>(null);
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        if (!formData.file) {
-          alert("Please upload an image");
-          return;
-        }
-        onSubmit(formData);
+        if (!formData.name || !formData.description || !file) return;
+        onSubmit(formData, file);
       }}
       className="space-y-4"
     >
@@ -74,15 +72,24 @@ export const ActivityForm: React.FC<{
       {/* upload image  */}
       <div className="flex justify-end space-x-3 mt-6">
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Image
+          Upload Image
         </label>
-        <Input
+        {/* <Input
           value={""}
           type="file"
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) {
               setFormData({ ...formData, file });
+            }
+          }}
+        /> */}
+        <input
+          type="file"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              setFile(file);
             }
           }}
         />
