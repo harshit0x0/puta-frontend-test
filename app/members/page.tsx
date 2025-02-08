@@ -1,12 +1,14 @@
 "use client";
 import React, { useState, useMemo, useEffect } from "react";
 import { Member } from "../types";
+import Loading from "@/components/ui/loading";
 
 export default function MembersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const membersPerPage = 20;
 
   const [members, setMembers] = useState<Member[] | null>([]);
+  const [loading, setLoading] = useState(true);
 
   const assignPosition = (members: Member[]) => {
     return members.map((member) => {
@@ -59,6 +61,7 @@ export default function MembersPage() {
   useEffect(() => {
     async function fetchMembers() {
       try {
+        setLoading(true);
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/members`
         );
@@ -68,6 +71,8 @@ export default function MembersPage() {
         setMembers(members);
       } catch (error) {
         console.error("Error fetching members:", error);
+      } finally {
+        setLoading(false);
       }
     }
     // console.log("members", members);
@@ -79,7 +84,6 @@ export default function MembersPage() {
       <h1 className="text-3xl font-bold mb-8 text-center text-blue-900">
         PUTA Members
       </h1>
-
       <div className="overflow-x-auto">
         <table className="w-full border-collapse border border-gray-200">
           <thead className="bg-blue-50">
@@ -109,6 +113,7 @@ export default function MembersPage() {
             ))}
           </tbody>
         </table>
+        {loading && <Loading />}
 
         {/* Pagination Controls */}
         <div className="flex justify-center mt-4 space-x-2">

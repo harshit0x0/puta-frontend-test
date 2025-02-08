@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Loading from "../ui/loading";
 
 interface News {
   id: string;
@@ -16,11 +17,12 @@ export default function NewsSection() {
   const [direction, setDirection] = useState<"down" | "up">("down");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [news, setNews] = useState<News[] | null>(null);
-
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     // Fetch news from the server
     async function fetchNews() {
       try {
+        setIsLoading(true);
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/news`
         );
@@ -39,6 +41,8 @@ export default function NewsSection() {
       } catch (error) {
         console.error("Error fetching news:", error);
         return [];
+      } finally {
+        setIsLoading(false);
       }
     }
     fetchNews();
@@ -85,6 +89,7 @@ export default function NewsSection() {
     <section className="w-full md:w-1/3">
       <h2 className="text-2xl font-bold mb-4 text-blue-900">Latest News</h2>
       <div className="border bg-white p-4 rounded-lg shadow-md h-[400px] overflow-hidden">
+      {isLoading && <Loading />}
         <div
           ref={scrollContainerRef}
           className="h-full overflow-y-auto scroll-smooth"

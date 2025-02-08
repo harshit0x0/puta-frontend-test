@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/items";
 import Image from "next/image";
 import { Activity } from "../types";
+import Loading from "@/components/ui/loading";
 
 // const activities: Activity[] = [
 //   {
@@ -46,11 +47,13 @@ import { Activity } from "../types";
 // ];
 
 export default function ActivitiesPage() {
+  const [loading, setLoading] = useState(true);
   const [activities, setActivities] = useState<Activity[]>([]);
   useEffect(() => {
     // Fetch activities from the server
     async function fetchActivities() {
       try {
+        setLoading(true);
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/activities`
         );
@@ -66,6 +69,8 @@ export default function ActivitiesPage() {
       } catch (error) {
         console.error("Error fetching activities:", error);
         return [];
+      } finally { 
+        setLoading(false);
       }
     }
     fetchActivities();
@@ -76,6 +81,7 @@ export default function ActivitiesPage() {
         PUTA Activities
       </h1>
       <div className="space-y-8">
+        {loading && <Loading />}
         {activities.map((activity, index) => (
           <Card key={index} className="overflow-hidden">
             <div className="md:flex">

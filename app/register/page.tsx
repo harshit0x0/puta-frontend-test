@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Member } from "../types";
 import { displayRazorpay } from "@/utils/displayRazorpay";
 import { useRouter } from "next/navigation";
+import Loading from "@/components/ui/loading";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState<Member>({
@@ -23,7 +24,13 @@ export default function RegisterPage() {
     "Professor",
     "Lecturer",
     "Research Scholar",
+    "Head of Department",
+    "Dean",
+    "Director",
+    "Registrar",
   ];
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (
     e:
@@ -49,10 +56,13 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setIsLoading(true);
       await displayRazorpay(formData, navigate);
     } catch (error) {
       console.log(error);
       alert("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -150,7 +160,7 @@ export default function RegisterPage() {
               <li>Payment via Secure Razorpay Portal</li>
             </ul>
           </div>
-
+          
           <button
             type="submit"
             className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
@@ -158,6 +168,7 @@ export default function RegisterPage() {
             Proceed to Payment (₹1000)
           </button>
         </form>
+        {isLoading && <Loading />}
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Activity } from "@/app/types";
 import { useState, useEffect } from "react";
 import SwiperCarousel from "./swiper-carousel";
+import Loading from "../ui/loading";
 // const activities = [
 //     { id: 1, title: 'Annual Teachers Conference', date: '2024-03 - 15', image: '/image1.jpeg' },
 //     { id: 2, title: 'PUTA Welfare Initiative Launch', date: '2024-02-28', image: '/image2.jpeg' },
@@ -12,10 +13,12 @@ import SwiperCarousel from "./swiper-carousel";
 export default function ActivitiesCarousel() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     // Fetch activities from the server
     async function fetchActivities() {
       try {
+        setLoading(true);
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/activities`
         );
@@ -31,6 +34,8 @@ export default function ActivitiesCarousel() {
       } catch (error) {
         console.error("Error fetching activities:", error);
         return [];
+      } finally {
+        setLoading(false);
       }
     }
     fetchActivities();
@@ -52,6 +57,7 @@ export default function ActivitiesCarousel() {
       <h2 className=" text-2xl lg:text-3xl font-bold my-4 text-blue-900">
         Recent Activities
       </h2>
+      {loading && <Loading />}
       <SwiperCarousel activities={activities} />
     </section>
   );
